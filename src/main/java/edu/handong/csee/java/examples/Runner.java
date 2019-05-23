@@ -1,5 +1,7 @@
 package edu.handong.csee.java.examples;
 
+import java.io.File;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -10,20 +12,21 @@ import org.apache.commons.cli.Options;
 public class Runner {
 	
 	String path;
+	String fullpath;
+	boolean fOn;
 	boolean verbose;
 	boolean help;
+	int numOfFiles = 0;
 
 	public static void main(String[] args) {
-
 		Runner myRunner = new Runner();
 		myRunner.run(args);
-
 	}
 
 	private void run(String[] args) {
 		Options options = createOptions();
-		
 		if(parseOptions(options, args)){
+			File file = new File(path);
 			if (help){
 				printHelp(options);
 				return;
@@ -32,11 +35,23 @@ public class Runner {
 			// path is required (necessary) data so no need to have a branch.
 			System.out.println("You provided \"" + path + "\" as the value of the option p");
 			
-			// TODO show the number of files in the path
+			for(String temp : file.list()) {
+	            numOfFiles++;
+	         }
+			System.out.println("number of files in the path : " + numOfFiles);
 			
+			if(fOn) {
+				fullpath = file.getAbsolutePath();
+				System.out.println("Fullpath : " +fullpath);
+			}
+			
+			// TODO show the number of files in the path
 			if(verbose) {
-				
 				// TODO list all files in the path
+				
+				for(String tempPath : file.list()) {
+					System.out.println(tempPath);
+				}
 				
 				System.out.println("Your program is terminated. (This message is shown because you turned on -v option!");
 			}
@@ -49,11 +64,12 @@ public class Runner {
 		try {
 
 			CommandLine cmd = parser.parse(options, args);
-
+			
 			path = cmd.getOptionValue("p");
 			verbose = cmd.hasOption("v");
 			help = cmd.hasOption("h");
-
+			fOn = cmd.hasOption("f");
+			
 		} catch (Exception e) {
 			printHelp(options);
 			return false;
@@ -87,6 +103,12 @@ public class Runner {
 		        .desc("Help")
 		        .build());
 
+		options.addOption(Option.builder("f").longOpt("fullpath")
+				.desc("display the full path of the files in the directory")
+				.hasArg()
+				.argName("full path to display")
+				.build());
+		
 		return options;
 	}
 	
